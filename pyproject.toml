@@ -1,3 +1,10 @@
+[project]
+name = "stocksense"
+version = "1.0.0"
+description = "AI-powered stock market analysis and prediction application"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
 [tool.uv]
 environments = [
     "sys_platform == 'linux'"
