@@ -1,0 +1,2733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="StockSense — AI-powered stock market intelligence, machine learning direction classification, experimental forecasting, and technical analysis."
+    >
+
+    <meta
+        name="theme-color"
+        content="#070908"
+    >
+
+    <title>StockSense — AI Stock Intelligence</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <script
+        src="https://cdn.plot.ly/plotly-2.32.0.min.js"
+    ></script>
+
+</head>
+
+
+<body>
+
+<!-- =====================================================
+     BACKGROUND
+     ===================================================== -->
+
+<div class="background-grid"></div>
+
+<div class="background-glow glow-one"></div>
+<div class="background-glow glow-two"></div>
+
+
+<!-- =====================================================
+     NAVBAR
+     ===================================================== -->
+
+<header class="topbar">
+
+    <div class="topbar-inner">
+
+        <a
+            href="/"
+            class="brand"
+            aria-label="StockSense home"
+        >
+
+            <div class="brand-mark">
+                <span>↗</span>
+            </div>
+
+            <div class="brand-text">
+
+                <div class="brand-name">
+                    Stock<span>Sense</span>
+                </div>
+
+                <div class="brand-subtitle">
+                    AI MARKET INTELLIGENCE
+                </div>
+
+            </div>
+
+        </a>
+
+
+        <div class="market-status">
+
+            <span class="status-dot"></span>
+
+            <span>
+                ANALYTICS ONLINE
+            </span>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     MAIN
+     ===================================================== -->
+
+<main class="container">
+
+
+    <!-- =================================================
+         HERO
+         ================================================= -->
+
+    <section class="hero">
+
+        <div class="hero-copy">
+
+            <div class="eyebrow">
+                MACHINE LEARNING
+                <span>•</span>
+                MARKET ANALYSIS
+            </div>
+
+            <h1>
+                Understand the market.
+                <span>Before you trade.</span>
+            </h1>
+
+            <p>
+                StockSense combines machine learning, technical
+                indicators and interpretable market analysis to help
+                you understand stock behavior from multiple angles.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         CONTROLS
+         ================================================= -->
+
+    <section class="controls-panel">
+
+        <div class="control-group">
+
+            <label for="ticker">
+                TICKER SYMBOL
+            </label>
+
+            <div class="input-wrapper">
+
+                <span
+                    class="input-icon"
+                    aria-hidden="true"
+                >
+                    $
+                </span>
+
+                <input
+                    type="text"
+                    id="ticker"
+                    placeholder="AAPL"
+                    value="AAPL"
+                    autocomplete="off"
+                    maxlength="10"
+                    spellcheck="false"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="control-group">
+
+            <label for="days_ahead">
+                ANALYSIS HORIZON
+            </label>
+
+            <div class="input-wrapper">
+
+                <input
+                    type="number"
+                    id="days_ahead"
+                    min="1"
+                    max="30"
+                    value="7"
+                >
+
+                <span class="input-suffix">
+                    DAYS
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <button
+            id="analyzeBtn"
+            class="btn-primary"
+            type="button"
+        >
+
+            <span id="buttonText">
+                Analyze Market
+            </span>
+
+            <span
+                id="buttonLoader"
+                class="button-loader"
+                aria-hidden="true"
+            ></span>
+
+            <span
+                id="buttonArrow"
+                class="button-arrow"
+                aria-hidden="true"
+            >
+                →
+            </span>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="secondary-button"
+            id="validateModelBtn"
+        >
+
+            <span id="validateButtonText">
+                Run Model Validation
+            </span>
+
+            <span
+                id="validateButtonLoader"
+                class="button-loader"
+                aria-hidden="true"
+            ></span>
+
+        </button>
+
+    </section>
+
+
+    <div class="data-info">
+
+        <span
+            class="info-dot"
+            aria-hidden="true"
+        ></span>
+
+        Analyzing the latest
+        <strong>2 years</strong>
+        of historical market data
+
+    </div>
+
+
+    <!-- =================================================
+         STATUS
+         ================================================= -->
+
+    <div
+        id="statusMsg"
+        class="status-msg"
+        role="status"
+        aria-live="polite"
+    ></div>
+
+
+    <!-- =================================================
+         RESULTS
+         ================================================= -->
+
+    <section
+        id="resultsSection"
+        class="results"
+    >
+
+
+        <!-- =================================================
+             MARKET SUMMARY
+             ================================================= -->
+
+        <section class="summary-grid">
+
+
+            <div class="metric-card">
+
+                <div class="metric-top">
+
+                    <span class="metric-label">
+                        TICKER
+                    </span>
+
+                    <span class="metric-icon">
+                        ◈
+                    </span>
+
+                </div>
+
+                <strong
+                    id="sumTicker"
+                    class="metric-value"
+                >
+                    —
+                </strong>
+
+                <span class="metric-caption">
+                    Analyzed asset
+                </span>
+
+            </div>
+
+
+            <div class="metric-card">
+
+                <div class="metric-top">
+
+                    <span class="metric-label">
+                        LAST CLOSE
+                    </span>
+
+                    <span class="metric-icon">
+                        $
+                    </span>
+
+                </div>
+
+                <strong
+                    id="sumLastClose"
+                    class="metric-value"
+                >
+                    —
+                </strong>
+
+                <span
+                    id="sumDailyChange"
+                    class="metric-caption"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="metric-card">
+
+                <div class="metric-top">
+
+                    <span class="metric-label">
+                        ML DIRECTION
+                    </span>
+
+                    <span class="metric-icon">
+                        ↗
+                    </span>
+
+                </div>
+
+                <strong
+                    id="sumTrend"
+                    class="metric-value trend-value"
+                >
+                    —
+                </strong>
+
+                <span
+                    id="sumProbability"
+                    class="metric-caption"
+                >
+                    —
+                </span>
+
+            </div>
+
+
+            <div class="metric-card">
+
+                <div class="metric-top">
+
+                    <span class="metric-label">
+                        CONFIDENCE
+                    </span>
+
+                    <span class="metric-icon">
+                        ◉
+                    </span>
+
+                </div>
+
+                <strong
+                    id="sumConfidence"
+                    class="metric-value"
+                >
+                    —
+                </strong>
+
+                <span class="metric-caption">
+                    Classifier confidence
+                </span>
+
+            </div>
+
+
+            <div class="metric-card">
+
+                <div class="metric-top">
+
+                    <span class="metric-label">
+                        DATA SOURCE
+                    </span>
+
+                    <span class="metric-icon">
+                        ◌
+                    </span>
+
+                </div>
+
+                <strong
+                    id="sumSource"
+                    class="metric-value metric-source"
+                >
+                    —
+                </strong>
+
+                <span class="metric-caption">
+                    Market data
+                </span>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             PRICE ANALYSIS
+             ================================================= -->
+
+        <section class="analysis-grid">
+
+
+            <!-- =================================================
+                 PRICE CHART
+                 ================================================= -->
+
+            <div class="dashboard-card chart-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <div class="section-eyebrow">
+                            MARKET HISTORY &amp; FORECAST
+                        </div>
+
+                        <h2>
+                            Price movement
+                        </h2>
+
+                        <p>
+                            Historical closing prices with the
+                            experimental machine learning forecast.
+                        </p>
+
+                    </div>
+
+                    <div class="live-badge">
+                        LIVE ANALYSIS
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="chartDiv"
+                    class="chart"
+                    aria-label="Stock price history and forecast chart"
+                ></div>
+
+
+                <div class="chart-legend">
+
+                    <div class="legend-item">
+
+                        <span class="legend-dot historical"></span>
+
+                        Historical
+
+                    </div>
+
+                    <div class="legend-item">
+
+                        <span class="legend-dot forecast"></span>
+
+                        Experimental Forecast
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 DIRECTION CLASSIFIER
+                 ================================================= -->
+
+            <div class="dashboard-card direction-card main-prediction-card">
+
+                <div class="section-header compact">
+
+                    <div>
+
+                        <div class="section-eyebrow">
+                            ML CLASSIFIER
+                        </div>
+
+                        <h2>
+                             AI Market Direction
+                        </h2>
+
+                    </div>
+
+                    <span class="model-badge">
+                        PRODUCTION MODEL
+                    </span>
+
+                </div>
+
+
+                <div class="direction-result">
+
+                    <div
+                        id="directionIcon"
+                        class="direction-icon"
+                        aria-hidden="true"
+                    >
+                        ↗
+                    </div>
+
+                    <div>
+
+                        <span class="direction-label">
+                            MODEL PREDICTION
+                        </span>
+
+                        <strong
+                            id="directionValue"
+                            class="direction-value"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="probability-section">
+
+                    <div class="probability-heading">
+
+                        <span>
+                            UP
+                        </span>
+
+                        <strong id="probabilityUp">
+                            —
+                        </strong>
+
+                    </div>
+
+                    <div class="probability-bar">
+
+                        <div
+                            id="probabilityUpBar"
+                            class="probability-fill up-fill"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="probability-heading">
+
+                        <span>
+                            DOWN
+                        </span>
+
+                        <strong id="probabilityDown">
+                            —
+                        </strong>
+
+                    </div>
+
+                    <div class="probability-bar">
+
+                        <div
+                            id="probabilityDownBar"
+                            class="probability-fill down-fill"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="confidence-box">
+
+                    <div>
+
+                        <span>
+                            CLASSIFIER CONFIDENCE
+                        </span>
+
+                        <strong id="directionConfidence">
+                            —
+                        </strong>
+
+                    </div>
+
+                    <div class="confidence-track">
+
+                        <div
+                            id="confidenceBar"
+                            class="confidence-fill"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="classifier-note">
+
+                     <strong>
+                        How to read this signal
+                    </strong>
+
+                    <span>
+                        The classifier estimates the probability of the next
+                        market direction from historical market features.
+                        Confidence is a model output, not a guarantee of future
+                        performance.
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+        <!-- =========================================================
+            PREDICTION TRANSPARENCY
+        ========================================================= -->
+
+        <section class="prediction-transparency-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        MODEL TRANSPARENCY
+                    </span>
+
+                    <h2>
+                        Prediction Inputs
+                    </h2>
+
+                    <p>
+                        The latest feature values supplied to the
+                        production direction classifier.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="transparency-card">
+
+                <!-- Prediction Summary -->
+
+                <div class="transparency-summary">
+
+                    <div class="transparency-summary-item">
+
+                        <span>Prediction</span>
+
+                        <strong id="transparencyPrediction">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="transparency-summary-item">
+
+                        <span>UP Probability</span>
+
+                        <strong id="transparencyProbabilityUp">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="transparency-summary-item">
+
+                        <span>DOWN Probability</span>
+
+                        <strong id="transparencyProbabilityDown">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="transparency-summary-item">
+
+                        <span>
+                            Confidence
+                        </span>
+
+                        <strong
+                            id="transparencyConfidence"
+                        >
+                            —
+                        </strong>
+
+                        <small
+                            id="transparencyConfidenceLevel"
+                            class="confidence-level"
+                        >
+                            —
+                        </small>
+
+                    </div>
+                </div>
+                <div
+                    id="confidenceWarning"
+                    class="confidence-warning"
+                    hidden
+                >
+
+                    <div class="transparency-info-icon">
+                        !
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Low-confidence signal
+                        </strong>
+
+                        <p>
+                            The classifier's directional confidence is relatively
+                            close to the decision boundary. Treat this prediction
+                            as a weak signal rather than a strong directional call.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- Feature Inputs -->
+
+                <div class="transparency-features">
+
+                    <div class="transparency-features-header">
+
+                        <div>
+
+                            <span class="model-label">
+                                CURRENT MODEL INPUTS
+                            </span>
+
+                            <h3>
+                                Production Feature Values
+                            </h3>
+
+                        </div>
+
+                        <span
+                            id="transparencyFeatureCount"
+                            class="feature-count-badge"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="transparencyFeatureList"
+                        class="transparency-feature-list"
+                    >
+
+                        <div class="feature-loading">
+                            Run a prediction to load model inputs.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Interpretation -->
+
+                <div class="transparency-interpretation">
+
+                    <div class="transparency-info-icon">
+                        i
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            How to read this
+                        </strong>
+
+                        <p>
+                            These values are the latest inputs supplied
+                            to the production classifier. They describe
+                            recent returns, volatility, and volume behavior.
+                            They are model inputs, not proof that any single
+                            feature caused the prediction.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="prediction-uncertainty-section">
+
+            <div class="section-header">
+                <div>
+                    <span class="model-label">PREDICTION UNCERTAINTY</span>
+                    <h3>How strong is the directional edge?</h3>
+                </div>
+            </div>
+
+            <div class="uncertainty-card">
+
+                <div class="uncertainty-card-header">
+
+                    <div>
+                        <span class="uncertainty-label">
+                            MODEL UNCERTAINTY
+                        </span>
+
+                        <h4 id="uncertaintyLevel">
+                            —
+                        </h4>
+                    </div>
+
+                    <div
+                        id="uncertaintyIndicator"
+                        class="uncertainty-indicator"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+                <div class="uncertainty-grid">
+
+                    <div class="uncertainty-metric">
+
+                        <span class="uncertainty-metric-label">
+                            PROBABILITY SPREAD
+                        </span>
+
+                        <strong id="uncertaintySpread">
+                            —
+                        </strong>
+
+                        <span class="uncertainty-metric-description">
+                            Distance between the UP and DOWN class probabilities.
+                        </span>
+
+                    </div>
+
+
+                    <div class="uncertainty-metric">
+
+                        <span class="uncertainty-metric-label">
+                            UP PROBABILITY
+                        </span>
+
+                        <strong id="uncertaintyProbabilityUp">
+                            —
+                        </strong>
+
+                        <span class="uncertainty-metric-description">
+                            Estimated probability of the UP class.
+                        </span>
+
+                    </div>
+
+
+                    <div class="uncertainty-metric">
+
+                        <span class="uncertainty-metric-label">
+                            DOWN PROBABILITY
+                        </span>
+
+                        <strong id="uncertaintyProbabilityDown">
+                            —
+                        </strong>
+
+                        <span class="uncertainty-metric-description">
+                            Estimated probability of the DOWN class.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="uncertainty-note">
+
+                    <span class="transparency-info-icon">
+                        i
+                    </span>
+
+                    <p>
+                        A smaller probability spread means the classifier
+                        has a weaker directional edge. A larger spread
+                        indicates a stronger model signal, but it does not
+                        guarantee future market performance.
+                    </p>
+
+                </div>
+
+                <div
+                    id="predictionUncertaintySummary"
+                    class="prediction-uncertainty-summary"
+                    >
+
+                    <span
+                        id="predictionUncertaintyLevel"
+                        class="prediction-uncertainty-level"
+                    >
+                        —
+                    </span>
+
+                    <span
+                        id="predictionUncertaintySpread"
+                        class="prediction-uncertainty-spread"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =========================================================
+            PREDICTION INTEGRITY
+            ========================================================= -->
+
+        <section class="prediction-integrity-section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <span class="model-label">
+                        PREDICTION INTEGRITY
+                    </span>
+
+                    <h3>
+                        What each StockSense signal means
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div class="integrity-grid">
+
+                <!-- MODEL VALIDATION -->
+
+                <div class="integrity-card">
+
+                    <div class="integrity-card-header">
+
+                        <span class="integrity-icon">
+                            ✓
+                        </span>
+
+                        <div>
+
+                            <span class="integrity-label">
+                                MODEL VALIDATION
+                            </span>
+
+                            <h4>
+                                Historical performance
+                            </h4>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="integrity-value">
+                        <span id="integrityValidationAccuracy">
+                            —
+                        </span>
+                    </div>
+
+                    <p>
+                        Expanding walk-forward validation accuracy
+                        measured on historical data.
+                    </p>
+
+                    <div class="integrity-meta">
+
+                        <span>
+                            ROC-AUC
+                        </span>
+
+                        <strong id="integrityValidationRocAuc">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CURRENT PREDICTION -->
+
+                <div class="integrity-card">
+
+                    <div class="integrity-card-header">
+
+                        <span class="integrity-icon">
+                            →
+                        </span>
+
+                        <div>
+
+                            <span class="integrity-label">
+                                CURRENT PREDICTION
+                            </span>
+
+                            <h4>
+                                Production classifier
+                            </h4>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="integrity-value">
+
+                        <span id="integrityPrediction">
+                            —
+                        </span>
+
+                    </div>
+
+                    <p>
+                        Current directional output from the
+                        calibrated production classifier.
+                    </p>
+
+                    <div class="integrity-meta">
+
+                        <span>
+                            Estimated probability
+                        </span>
+
+                        <strong id="integrityPredictionProbability">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- AI ANALYST -->
+
+                <div class="integrity-card">
+
+                    <div class="integrity-card-header">
+
+                        <span class="integrity-icon">
+                            AI
+                        </span>
+
+                        <div>
+
+                            <span class="integrity-label">
+                                AI TECHNICAL ANALYST
+                            </span>
+
+                            <h4>
+                                Indicator-based analysis
+                            </h4>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="integrity-value">
+
+                        <span id="integrityAnalystSignal">
+                            —
+                        </span>
+
+                    </div>
+
+                    <p>
+                        Deterministic technical analysis based on
+                        indicators such as RSI, moving averages,
+                        MACD and momentum.
+                    </p>
+
+                    <div class="integrity-meta">
+
+                        <span>
+                            Strength
+                        </span>
+
+                        <strong id="integrityAnalystStrength">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="integrity-note">
+
+                <span class="transparency-info-icon">
+                    i
+                </span>
+
+                <p>
+                    These signals measure different things.
+                    Validation describes historical model performance,
+                    the current prediction describes the classifier's
+                    present output, and the AI analyst summarizes
+                    technical indicators. None of them guarantees
+                    future market performance.
+                </p>
+
+            </div>
+
+        </section>
+
+        <section class="explainability-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        MODEL EXPLAINABILITY
+                    </span>
+
+                    <h2>
+                        Why did the model make this prediction?
+                    </h2>
+
+                    <p>
+                        SHAP contributions show how each production
+                        feature influenced the underlying classifier output.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="explainability-card">
+
+                <div class="explainability-summary">
+
+                    <div class="explainability-summary-item">
+
+                        <span>
+                            Prediction
+                        </span>
+
+                        <strong
+                            id="explainPrediction"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="explainability-summary-item">
+
+                        <span>
+                            Confidence
+                        </span>
+
+                        <strong
+                            id="explainConfidence"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="explainability-summary-item">
+
+                        <span>
+                            Explanation Method
+                        </span>
+
+                        <strong
+                            id="explainMethod"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="explainability-summary-item">
+
+                        <span>
+                            Features
+                        </span>
+
+                        <strong
+                            id="explainFeatureCount"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="explainability-content">
+
+                    <div class="explainability-header">
+
+                        <div>
+
+                            <span class="model-label">
+                                FEATURE CONTRIBUTIONS
+                            </span>
+
+                            <h3>
+                                Production Model Inputs
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="explainabilityList"
+                        class="explainability-list"
+                    >
+
+                        <div class="feature-loading">
+                            Run a prediction to generate
+                            the model explanation.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="explainability-legend">
+
+                    <div class="explainability-legend-item">
+
+                        <span class="legend-positive">
+                            +
+                        </span>
+
+                        <span>
+                            Positive contribution toward UP
+                        </span>
+
+                    </div>
+
+
+                    <div class="explainability-legend-item">
+
+                        <span class="legend-negative">
+                            −
+                        </span>
+
+                        <span>
+                            Negative contribution toward UP
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="explainability-note">
+
+                    <div class="transparency-info-icon">
+                        i
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            How to interpret this
+                        </strong>
+
+                        <p>
+                            SHAP values describe feature contributions
+                            to the underlying Extra Trees classifier.
+                            They show model behavior, not market causation.
+                            A positive contribution pushes the model toward
+                            UP, while a negative contribution pushes it
+                            toward DOWN.
+                        </p>
+                        
+                    </div>
+
+               </div>
+
+            </div>
+
+        </section>
+        <!-- =========================================================
+            PRODUCTION MODEL
+        ========================================================= -->
+
+        <section class="production-model-section">
+
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">MACHINE LEARNING</span>
+                    <h2>Production Model</h2>
+                    <p>
+                        Live information about the classifier currently used
+                        for market direction predictions.
+                    </p>
+                </div>
+
+                <span
+                    id="modelStatus"
+                    class="model-status"
+                >
+                    Loading...
+                </span>
+            </div>
+
+            <div class="production-model-grid">
+
+                <!-- Model Identity -->
+                <div class="model-card model-identity-card">
+
+                    <div class="model-card-header">
+                        <div>
+                            <span class="model-label">MODEL</span>
+                            <h3 id="modelName">
+                                —
+                            </h3>
+                        </div>
+
+                        <div class="model-icon">
+                            AI
+                        </div>
+                    </div>
+
+                    <div class="model-details">
+
+                        <div class="model-detail">
+                            <span>Model Type</span>
+                            <strong id="modelType">—</strong>
+                        </div>
+
+                        <div class="model-detail">
+                            <span>Base Model</span>
+                            <strong id="baseModel">—</strong>
+                        </div>
+
+                        <div class="model-detail">
+                            <span>Calibration</span>
+                            <strong id="modelCalibration">—</strong>
+                        </div>
+
+                        <div class="model-detail">
+                            <span>Features</span>
+                            <strong id="modelFeatureCount">—</strong>
+                        </div>
+
+                        <div class="model-detail">
+                            <span>Training Rows</span>
+                            <strong id="modelTrainingRows">—</strong>
+                        </div>
+
+                    </div>
+                    <!-- Production Features -->
+
+                    <div class="production-features">
+
+                        <div class="production-features-header">
+
+                            <div>
+                                <span class="model-label">PRODUCTION FEATURES</span>
+
+                                <h4>
+                                    Features used by the classifier
+                                </h4>
+                            </div>
+
+                            <span
+                                id="modelFeatureCountBadge"
+                                class="feature-count-badge"
+                            >
+                                —
+                            </span>
+
+                        </div>
+
+                        <div
+                            id="productionFeatureList"
+                            class="production-feature-list"
+                        >
+
+                            <div class="feature-loading">
+                                Loading features...
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Validation Performance -->
+                <div class="model-card">
+
+                    <div class="model-card-header">
+                        <div>
+                            <span class="model-label">VALIDATION</span>
+                            <h3>Model Performance</h3>
+                        </div>
+                    </div>
+
+                    <div class="validation-metrics-grid">
+
+                        <div class="validation-metric">
+                            <span>Accuracy</span>
+                            <strong id="modelValidationAccuracy">
+                                —
+                            </strong>
+                        </div>
+
+                        <div class="validation-metric">
+                            <span>ROC-AUC</span>
+                            <strong id="modelValidationRocAuc">
+                                —
+                            </strong>
+                        </div>
+
+                        <div class="validation-metric">
+                            <span>Brier Score</span>
+                            <strong id="modelBrierScore">
+                                —
+                            </strong>
+                        </div>
+
+                        <div class="validation-metric">
+                            <span>Log Loss</span>
+                            <strong id="modelLogLoss">
+                                —
+                            </strong>
+                        </div>
+
+                        <div class="validation-metric">
+                            <span>Majority Baseline</span>
+                            <strong id="modelBaseline">
+                                —
+                            </strong>
+                        </div>
+
+                        <div class="validation-metric improvement">
+                            <span>vs Baseline</span>
+                            <strong id="modelImprovement">
+                                —
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Validation Method -->
+                <div class="model-card model-method-card">
+
+                    <div class="model-card-header">
+                        <div>
+                            <span class="model-label">VALIDATION METHOD</span>
+                            <h3 id="modelValidationMethod">
+                                —
+                            </h3>
+                        </div>
+                    </div>
+
+                    <div class="method-details">
+
+                        <div class="method-item">
+                            <span>Confirmation Splits</span>
+                            <strong id="modelConfirmationSplits">
+                                —
+                            </strong>
+                        </div>
+
+                        <div class="method-item">
+                            <span>Minimum Training Size</span>
+                            <strong id="modelMinTrainingSize">
+                                150
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <div class="model-note">
+                        <span class="note-icon">i</span>
+
+                        <p id="modelProbabilityNote">
+                            Model probabilities are estimates,
+                            not guarantees of future market direction.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             EXPERIMENTAL FORECAST
+             ================================================= -->
+
+        <section class="dashboard-card forecast-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <div class="section-eyebrow">
+                        MACHINE LEARNING FORECAST
+                    </div>
+
+                    <h2>
+                        Experimental price forecast
+                    </h2>
+
+                    <p>
+                        Estimated future prices generated from the
+                        current return-based regression model.
+                    </p>
+
+                </div>
+
+                <div class="experimental-status">
+                    EXPERIMENTAL
+                </div>
+
+            </div>
+
+
+            <div class="forecast-overview">
+
+                <div class="forecast-stat">
+
+                    <span>
+                        MODEL
+                    </span>
+
+                    <strong id="forecastModel">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="forecast-stat">
+
+                    <span>
+                        FORECAST HORIZON
+                    </span>
+
+                    <strong id="forecastHorizon">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="forecast-stat">
+
+                    <span>
+                        FIRST PREDICTION
+                    </span>
+
+                    <strong id="forecastFirstPrice">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="forecast-stat">
+
+                    <span>
+                        FINAL PREDICTION
+                    </span>
+
+                    <strong id="forecastFinalPrice">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="forecast-table-wrap">
+
+                <table class="forecast-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                DATE
+                            </th>
+
+                            <th>
+                                PREDICTED PRICE
+                            </th>
+
+                            <th>
+                                CHANGE
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="forecastTableBody">
+
+                        <tr>
+
+                            <td colspan="3">
+                                Run an analysis to generate
+                                future predictions.
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="forecast-evaluation">
+
+                <div class="evaluation-heading">
+
+                    <span class="signal-label">
+                        MODEL EVALUATION
+                    </span>
+
+                    <span class="evaluation-note">
+                        Historical validation
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="forecastEvaluation"
+                    class="evaluation-grid"
+                >
+
+                    <div class="evaluation-item">
+
+                        <span>
+                            MAE
+                        </span>
+
+                        <strong>
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="evaluation-item">
+
+                        <span>
+                            RMSE
+                        </span>
+
+                        <strong>
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="evaluation-item">
+
+                        <span>
+                            R²
+                        </span>
+
+                        <strong>
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="evaluation-item">
+
+                        <span>
+                            DIRECTIONAL ACCURACY
+                        </span>
+
+                        <strong>
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="forecast-warning">
+
+                <span aria-hidden="true">
+                    ⚠
+                </span>
+
+                <p id="regressionMessage">
+
+                    Future prices are model estimates, not guaranteed
+                    market outcomes. This regression model is currently
+                    classified as experimental and should not be used
+                    as financial advice.
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             AI ANALYST
+             ================================================= -->
+
+        <section class="dashboard-card analyst-card">
+
+            <div class="section-header">
+
+                <div>
+
+                    <div class="section-eyebrow">
+                        AI STOCK ANALYST
+                    </div>
+
+                    <h2>
+                        What is the model seeing?
+                    </h2>
+
+                    <p>
+                        Technical signals are combined into an interpretable
+                        market assessment.
+                    </p>
+
+                </div>
+
+                <div
+                    id="analystBadge"
+                    class="analyst-badge"
+                >
+                    ANALYZING
+                </div>
+
+            </div>
+
+
+            <div class="analyst-main-grid">
+
+
+                <div class="signal-card">
+
+                    <span class="signal-label">
+                        OVERALL SIGNAL
+                    </span>
+
+                    <strong
+                        id="analystSignal"
+                        class="signal-value"
+                    >
+                        —
+                    </strong>
+
+                    <span
+                        id="analystSummary"
+                        class="signal-summary"
+                    >
+                        Waiting for market analysis...
+                    </span>
+
+
+                    <div class="signal-strength">
+
+                        <div class="strength-header">
+
+                            <span>
+                                SIGNAL STRENGTH
+                            </span>
+
+                            <strong id="signalStrength">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="strength-bar">
+
+                            <div
+                                id="strengthFill"
+                                class="strength-fill"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="technical-card">
+
+                    <div class="technical-header">
+
+                        <span class="signal-label">
+                            TECHNICAL SNAPSHOT
+                        </span>
+
+                        <span class="technical-live">
+                            ● LIVE
+                        </span>
+
+                    </div>
+
+
+                    <div class="technical-grid">
+
+                        <div class="technical-item">
+
+                            <span>
+                                RSI
+                            </span>
+
+                            <strong id="techRSI">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="technical-item">
+
+                            <span>
+                                MACD
+                            </span>
+
+                            <strong id="techMACD">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="technical-item">
+
+                            <span>
+                                SMA 20
+                            </span>
+
+                            <strong id="techSMA20">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="technical-item">
+
+                            <span>
+                                SMA 50
+                            </span>
+
+                            <strong id="techSMA50">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="technical-item">
+
+                            <span>
+                                SMA 200
+                            </span>
+
+                            <strong id="techSMA200">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="technical-item">
+
+                            <span>
+                                DAILY MOVE
+                            </span>
+
+                            <strong id="techDailyMove">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="analyst-columns">
+
+
+                <div class="insight-panel">
+
+                    <div class="insight-heading">
+
+                        <span class="insight-icon positive">
+                            ✓
+                        </span>
+
+                        <h3>
+                            Supporting signals
+                        </h3>
+
+                    </div>
+
+                    <ul id="reasonsList">
+
+                        <li class="empty-insight">
+                            Run an analysis to see supporting signals.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <div class="insight-panel">
+
+                    <div class="insight-heading">
+
+                        <span class="insight-icon negative">
+                            !
+                        </span>
+
+                        <h3>
+                            Risks &amp; warnings
+                        </h3>
+
+                    </div>
+
+                    <ul id="risksList">
+
+                        <li class="empty-insight">
+                            Run an analysis to see potential risks.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+
+            <div class="analyst-disclaimer">
+
+                <span aria-hidden="true">
+                    ⓘ
+                </span>
+
+                AI analysis is based on historical market data and
+                technical indicators. It is informational only and
+                should not be treated as financial advice.
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================================================
+             MODEL RELIABILITY
+             ========================================================= -->
+
+        <section
+            class="reliability-section"
+            id="reliabilitySection"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-kicker">
+                        MODEL VALIDATION
+                    </span>
+
+                    <h2>
+                        Model Reliability
+                    </h2>
+
+                    <p>
+                        Historical walk-forward validation of the
+                        StockSense direction classifier.
+                    </p>
+
+                </div>
+
+                <div
+                    class="reliability-status weak"
+                    id="reliabilityStatus"
+                >
+
+                    <span id="reliabilityStatusDot"></span>
+
+                    <span id="reliabilityStatusText">
+                        NOT VALIDATED
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 VALIDATION OVERVIEW
+                 ================================================= -->
+
+            <div class="reliability-overview">
+
+                <div class="reliability-primary-card">
+
+                    <div class="reliability-card-label">
+                        Reliability
+                    </div>
+
+                    <div
+                        class="reliability-level"
+                        id="reliabilityLevel"
+                    >
+                        —
+                    </div>
+
+                    <div
+                        class="reliability-description"
+                        id="reliabilityDescription"
+                    >
+                        Run validation to measure historical model
+                        reliability.
+                    </div>
+
+                </div>
+
+
+                <div class="validation-stat-card">
+
+                    <span class="validation-stat-label">
+                        Observations
+                    </span>
+
+                    <strong id="validationObservations">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="validation-stat-card">
+
+                    <span class="validation-stat-label">
+                        Validation Splits
+                    </span>
+
+                    <strong id="validationSplits">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="validation-stat-card">
+
+                    <span class="validation-stat-label">
+                        Features
+                    </span>
+
+                    <strong id="validationFeatures">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 VALIDATION DIAGNOSTICS
+                 ================================================= -->
+
+            <div class="validation-diagnostics">
+
+
+                <!-- VALIDATION INTEGRITY -->
+
+                <div class="diagnostic-card">
+
+                    <div class="diagnostic-header">
+
+                        <span class="diagnostic-label">
+                            VALIDATION INTEGRITY
+                        </span>
+
+                        <span
+                            class="diagnostic-indicator"
+                            id="validationIntegrityIndicator"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+                    <strong
+                        class="diagnostic-value"
+                        id="validationIntegrityValue"
+                    >
+                        —
+                    </strong>
+
+                    <p
+                        class="diagnostic-description"
+                        id="validationIntegrityDescription"
+                    >
+                        Waiting for validation results.
+                    </p>
+
+                </div>
+
+
+                <!-- CLASS DISTRIBUTION -->
+
+                <div class="diagnostic-card">
+
+                    <div class="diagnostic-header">
+
+                        <span class="diagnostic-label">
+                            CLASS DISTRIBUTION
+                        </span>
+
+                        <span class="diagnostic-indicator">
+                            DATA
+                        </span>
+
+                    </div>
+
+                    <div class="distribution-values">
+
+                        <div>
+
+                            <span>
+                                UP
+                            </span>
+
+                            <strong id="validationUpPercent">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div>
+
+                            <span>
+                                DOWN
+                            </span>
+
+                            <strong id="validationDownPercent">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="distribution-bar">
+
+                        <div
+                            id="validationUpBar"
+                            class="distribution-up"
+                        ></div>
+
+                        <div
+                            id="validationDownBar"
+                            class="distribution-down"
+                        ></div>
+
+                    </div>
+
+                    <p
+                        class="diagnostic-description"
+                        id="validationClassDescription"
+                    >
+                        Class distribution will appear after validation.
+                    </p>
+
+                </div>
+
+
+                <!-- FOLD STABILITY -->
+
+                <div class="diagnostic-card">
+
+                    <div class="diagnostic-header">
+
+                        <span class="diagnostic-label">
+                            FOLD STABILITY
+                        </span>
+
+                        <span class="diagnostic-indicator">
+                            WALK-FORWARD
+                        </span>
+
+                    </div>
+
+                    <div class="stability-grid">
+
+                        <div>
+
+                            <span>
+                                AVERAGE
+                            </span>
+
+                            <strong id="foldAverageAccuracy">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div>
+
+                            <span>
+                                RANGE
+                            </span>
+
+                            <strong id="foldAccuracyRange">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="stability-folds">
+
+                        <span>
+                            Strongest:
+                            <strong id="strongestFold">
+                                —
+                            </strong>
+                        </span>
+
+                        <span>
+                            Weakest:
+                            <strong id="weakestFold">
+                                —
+                            </strong>
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MODEL ASSESSMENT -->
+
+                <div class="diagnostic-card assessment-card">
+
+                    <div class="diagnostic-header">
+
+                        <span class="diagnostic-label">
+                            MODEL ASSESSMENT
+                        </span>
+
+                        <span
+                            class="diagnostic-indicator"
+                            id="modelAssessmentIndicator"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+                    <strong
+                        class="diagnostic-value"
+                        id="modelAssessment"
+                    >
+                        —
+                    </strong>
+
+                    <p
+                        class="diagnostic-description"
+                        id="modelAssessmentDescription"
+                    >
+                        Model performance will be compared with
+                        the majority-class baseline.
+                    </p>
+
+                    <div class="assessment-delta">
+
+                        <span>
+                            Baseline difference
+                        </span>
+
+                        <strong id="modelAssessmentDelta">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 VALIDATION METRICS
+                 ================================================= -->
+
+            <div class="validation-metrics">
+
+                <div class="validation-metric">
+
+                    <span>
+                        Accuracy
+                    </span>
+
+                    <strong id="validationAccuracy">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="validation-metric">
+
+                    <span>
+                        Precision
+                    </span>
+
+                    <strong id="validationPrecision">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="validation-metric">
+
+                    <span>
+                        Recall
+                    </span>
+
+                    <strong id="validationRecall">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="validation-metric">
+
+                    <span>
+                        F1 Score
+                    </span>
+
+                    <strong id="validationF1">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="validation-metric">
+
+                    <span>
+                        ROC-AUC
+                    </span>
+
+                    <strong id="validationAuc">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 BASELINE
+                 ================================================= -->
+
+            <div class="validation-panel">
+
+                <div class="validation-panel-header">
+
+                    <div>
+
+                        <span class="section-kicker">
+                            BASELINE COMPARISON
+                        </span>
+
+                        <h3>
+                            Does the model beat a simple strategy?
+                        </h3>
+
+                    </div>
+
+                    <div
+                        class="baseline-result"
+                        id="baselineResult"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+
+                <div class="baseline-comparison">
+
+                    <div class="baseline-item">
+
+                        <span>
+                            StockSense
+                        </span>
+
+                        <strong id="modelBaselineAccuracy">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="baseline-divider">
+                        vs
+                    </div>
+
+
+                    <div class="baseline-item">
+
+                        <span id="baselineStrategy">
+                            Majority Baseline
+                        </span>
+
+                        <strong id="majorityBaselineAccuracy">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="baseline-improvement">
+
+                        <span>
+                            Improvement
+                        </span>
+
+                        <strong id="baselineImprovement">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 WALK-FORWARD FOLDS
+                 ================================================= -->
+
+            <div class="validation-panel">
+
+                <div class="validation-panel-header">
+
+                    <div>
+
+                        <span class="section-kicker">
+                            WALK-FORWARD VALIDATION
+                        </span>
+
+                        <h3>
+                            Fold Performance
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="fold-table-wrap">
+
+                    <table class="fold-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Fold
+                                </th>
+
+                                <th>
+                                    Train
+                                </th>
+
+                                <th>
+                                    Test
+                                </th>
+
+                                <th>
+                                    Accuracy
+                                </th>
+
+                                <th>
+                                    Precision
+                                </th>
+
+                                <th>
+                                    Recall
+                                </th>
+
+                                <th>
+                                    F1
+                                </th>
+
+                                <th>
+                                    ROC-AUC
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="foldTableBody">
+
+                            <tr>
+
+                                <td colspan="8">
+                                    Validation results will appear here.
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <!-- =================================================
+                 VALIDATION DISCLAIMER
+                 ================================================= -->
+
+            <div class="validation-disclaimer">
+
+                <strong>
+                    Validation note
+                </strong>
+
+                <span id="validationNote">
+                    Reliability reflects historical validation
+                    performance only. It does not predict future
+                    investment returns.
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ANALYSIS METADATA
+             ================================================= -->
+
+        <div class="analysis-meta">
+
+            <div>
+
+                <span>
+                    HISTORY
+                </span>
+
+                <strong id="historyInfo">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    ROWS ANALYZED
+                </span>
+
+                <strong id="rowsInfo">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    HORIZON
+                </span>
+
+                <strong id="horizonInfo">
+                    —
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+</main>
+
+
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
+<footer class="footer">
+
+    <div class="footer-inner">
+
+        <div class="footer-brand">
+            Stock<span>Sense</span>
+        </div>
+
+        <div class="footer-text">
+            AI-powered market intelligence
+        </div>
+
+        <div class="footer-disclaimer">
+            Educational project only · Not financial advice
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script
+    src="{{ url_for('static', filename='js/main.js') }}"
+></script>
+
+</body>
+
+</html>

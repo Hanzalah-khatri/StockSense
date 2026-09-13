@@ -1,0 +1,2 @@
+model,features,n_estimators,max_depth,min_samples_split,accuracy,precision,recall,f1,roc_auc,baseline_accuracy,vs_baseline,fold_mean_accuracy,fold_std_accuracy,fold_min_accuracy,fold_max_accuracy
+Extra Trees,5,300,15,10,0.5827814569536424,0.5865384615384616,0.7530864197530864,0.6594594594594595,0.5649029982363315,0.5364238410596026,0.04635761589403975,0.585578231292517,0.059878786039289304,0.48,0.6666666666666666

@@ -1,0 +1,51 @@
+{
+    "model_name": "Extra Trees Classifier",
+    "model_type": "ExtraTreesClassifier",
+    "ticker": "AAPL",
+    "target": "next_day_direction",
+    "target_mapping": {
+        "0": "DOWN",
+        "1": "UP"
+    },
+    "features": [
+        "Return_Lag_1",
+        "Return_Lag_3",
+        "Return_Lag_5",
+        "Volatility",
+        "Volume_Change"
+    ],
+    "feature_count": 5,
+    "hyperparameters": {
+        "n_estimators": 300,
+        "max_depth": 15,
+        "min_samples_split": 10,
+        "random_state": 42,
+        "n_jobs": -1,
+        "class_weight": "balanced"
+    },
+    "training_rows": 301,
+    "training_period": "2y",
+    "validation": {
+        "method": "Expanding walk-forward validation",
+        "confirmation_splits": 7,
+        "confirmation_min_train_size": 150,
+        "accuracy": 0.5828,
+        "precision": 0.5865,
+        "recall": 0.7531,
+        "f1": 0.6595,
+        "roc_auc": 0.5649,
+        "majority_baseline": 0.5364,
+        "improvement_over_baseline": 0.0464
+    },
+    "feature_selection": {
+        "method": "Feature importance + walk-forward comparison",
+        "selected_features": [
+            "Return_Lag_1",
+            "Return_Lag_3",
+            "Return_Lag_5",
+            "Volatility",
+            "Volume_Change"
+        ]
+    },
+    "trained_at": "2026-09-13T13:17:50.054882+00:00"
+}
