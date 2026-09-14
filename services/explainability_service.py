@@ -1,15 +1,17 @@
 import numpy as np
-import shap
 
 
 class ExplainabilityService:
     """
-    SHAP-based explainability service for the
+    Lightweight model explainability service for the
     StockSense production direction classifier.
 
-    Production model:
-        CalibratedClassifierCV
-            └── ExtraTreesClassifier
+    Instead of SHAP TreeExplainer, this production-safe
+    implementation uses the native feature_importances_
+    values from the underlying ExtraTrees classifier.
+
+    This avoids the heavy SHAP / Numba / llvmlite dependency
+    chain required by the previous implementation.
     """
 
     def __init__(self, classifier_service):
@@ -24,16 +26,16 @@ class ExplainabilityService:
             classifier_service.feature_columns
         )
 
-        self.explainer = None
-
-        self._create_explainer()
+        self.feature_importances_ = (
+            self._get_feature_importances()
+        )
 
 
     # =====================================================
-    # CREATE SHAP EXPLAINER
+    # GET FEATURE IMPORTANCES
     # =====================================================
 
-    def _create_explainer(self):
+    def _get_feature_importances(self):
 
         model = self.model
 
@@ -62,13 +64,20 @@ class ExplainabilityService:
                 calibrated_models[0].estimator
             )
 
-            self.explainer = (
-                shap.TreeExplainer(
-                    base_model
-                )
-            )
+            if not hasattr(
+                base_model,
+                "feature_importances_"
+            ):
 
-            return
+                raise ValueError(
+                    "Underlying calibrated model "
+                    "does not provide feature_importances_."
+                )
+
+            return np.asarray(
+                base_model.feature_importances_,
+                dtype=float
+            )
 
 
         # -------------------------------------------------
@@ -80,17 +89,24 @@ class ExplainabilityService:
             == "ExtraTreesClassifier"
         ):
 
-            self.explainer = (
-                shap.TreeExplainer(
-                    model
-                )
-            )
+            if not hasattr(
+                model,
+                "feature_importances_"
+            ):
 
-            return
+                raise ValueError(
+                    "ExtraTreesClassifier does not "
+                    "provide feature_importances_."
+                )
+
+            return np.asarray(
+                model.feature_importances_,
+                dtype=float
+            )
 
 
         raise ValueError(
-            "Unsupported model type for SHAP "
+            "Unsupported model type for "
             f"explainability: "
             f"{type(model).__name__}"
         )
@@ -152,67 +168,15 @@ class ExplainabilityService:
             )
 
         # -------------------------------------------------
-        # Calculate SHAP values
+        # Calculate lightweight contributions
         # -------------------------------------------------
-
-        shap_values = (
-            self.explainer.shap_values(
-                latest_row
-            )
-        )
-
-        # -------------------------------------------------
-        # Handle SHAP output format
-        # -------------------------------------------------
-
-        if isinstance(
-            shap_values,
-            list
-        ):
-
-            # Binary classification:
-            # index 1 = UP class
-            shap_array = np.asarray(
-                shap_values[1]
-            )
-
-        else:
-
-            shap_array = np.asarray(
-                shap_values
-            )
-
-            # New SHAP versions may return:
-            # (samples, features, classes)
-
-            if (
-                shap_array.ndim == 3
-            ):
-
-                shap_array = (
-                    shap_array[
-                        :, :, 1
-                    ]
-                )
-
-        # -------------------------------------------------
-        # Flatten latest row
-        # -------------------------------------------------
-
-        shap_array = np.asarray(
-            shap_array
-        ).reshape(-1)
 
         feature_values = (
             latest_row.iloc[0]
             .to_dict()
         )
 
-        # -------------------------------------------------
-        # Build feature explanations
-        # -------------------------------------------------
-
-        explanations = []
+        contributions = []
 
         for index, feature_name in enumerate(
             self.feature_columns
@@ -229,8 +193,70 @@ class ExplainabilityService:
 
                 value = value.item()
 
-            contribution = float(
-                shap_array[index]
+            importance = float(
+                self.feature_importances_[index]
+            )
+
+            # -------------------------------------------------
+            # Normalize the current feature value so that
+            # contribution reflects both importance and
+            # whether the current value is above/below the
+            # feature's recent mean.
+            # -------------------------------------------------
+
+            feature_series = X[
+                feature_name
+            ]
+
+            feature_mean = float(
+                feature_series.mean()
+            )
+
+            if feature_mean != 0:
+
+                relative_position = (
+                    float(value) - feature_mean
+                ) / abs(feature_mean)
+
+            else:
+
+                relative_position = (
+                    float(value)
+                )
+
+            contribution = (
+                importance
+                * relative_position
+            )
+
+            contributions.append(
+                {
+                    "name": feature_name,
+
+                    "value": float(
+                        value
+                    ),
+
+                    "contribution": float(
+                        contribution
+                    ),
+
+                    "importance": float(
+                        importance
+                    ),
+                }
+            )
+
+        # -------------------------------------------------
+        # Determine impact
+        # -------------------------------------------------
+
+        explanations = []
+
+        for item in contributions:
+
+            contribution = (
+                item["contribution"]
             )
 
             if contribution > 0:
@@ -247,14 +273,12 @@ class ExplainabilityService:
 
             explanations.append(
                 {
-                    "name": feature_name,
+                    "name": item["name"],
 
-                    "value": float(
-                        value
-                    ),
+                    "value": item["value"],
 
                     "contribution": (
-                        contribution
+                        item["contribution"]
                     ),
 
                     "impact": impact,
@@ -283,7 +307,9 @@ class ExplainabilityService:
                 explanations
             ),
 
-            "method": "SHAP TreeExplainer",
+            "method": (
+                "ExtraTrees Feature Importance"
+            ),
 
             "model": (
                 type(
